@@ -5,14 +5,6 @@ import re
 import copy
 
 
-def unique_id(graph: nx.MultiDiGraph, prefix: str = ""):
-    unique_id.count = max(unique_id.count, graph.number_of_nodes()) + 1
-    return prefix + str(unique_id.count)
-
-
-unique_id.count = 0
-
-
 def dump_graph_for_graphviz(graph: nx.MultiDiGraph, node_attrs: list = ['kind', 'op', 'shape'],
                             edge_attrs: list = ['in', 'out']):
     nodes_to_dump = graph.nodes()
@@ -53,23 +45,30 @@ def load_graph(graph_path):
         to_node = None
         post_id = None
         attrs = new_attrs()
-        for line in graph_file.readlines():
+        content = graph_file.readlines()
+        for idx, line in enumerate(content):
             if re.match('^\s*node\n$', line):
-                if is_in_node:
-                    new_node_attrs = copy.deepcopy(attrs)
-                    g.add_node(unique_id(g), **new_node_attrs)
-                    attrs = new_attrs()
                 is_in_node = True
                 continue
-            if re.match('^\s*edge\n$', line):
-                if is_in_edge:
-                    g.add_edge(from_node, to_node)
-                    from_node = None
-                    to_node = None
+            elif re.match('^\s*edge\n$', line):
                 is_in_edge = True
                 continue
+            elif re.match('^\s*]\n$', line) and is_in_node:
+                new_node_attrs = copy.deepcopy(attrs)
+                new_id = new_node_attrs['commentID'] if new_node_attrs['commentID'] else new_node_attrs['postID']
+                g.add_node(new_id, **new_node_attrs)
+                print(dump_graph_for_graphviz(g))
+                attrs = new_attrs()
+                is_in_node = False
+                continue
+            if re.match('^\s*]\n$', line) and is_in_edge:
+                g.add_edge(from_node, to_node)
+                from_node = None
+                to_node = None
+                is_in_edge = False
+                continue
+
             if is_in_node and re.match('^\s*id\s\d+\n$', line):
-                # TODO: if it is first - it is post ID
                 el_id = re.split('d+', line)[-1].strip()
                 if is_post_node:
                     attrs['postID'] = el_id
@@ -89,7 +88,28 @@ def load_graph(graph_path):
                 from_node = re.findall(r'\d+', line.strip())[0]
             elif is_in_edge and re.match(r'^\s*target\s\d+\n$', line):
                 to_node = re.findall(r'\d+', line.strip())[0]
+
     return g
+
+
+def slice_graph(graph, root=None, subgraph=()):
+    if not root:
+        root = next(nx.topological_sort(graph))
+    if not subgraph:
+        subgraph = (root,)
+    else:
+        subgraph = (*subgraph, root)
+
+    children = list(graph.successors(root))
+    if len(children) == 0:
+        # add the subgraph to the final list
+        return subgraph
+    all_subgraphs = []
+    for child in children:
+        # recursively go through the children
+        subgraphs_from_child = slice_graph(graph, root=child)
+        all_subgraphs.extend([(root, *sub_g) for sub_g in subgraphs_from_child])
+    return all_subgraphs
 
 
 if __name__ == '__main__':
@@ -121,5 +141,9 @@ if __name__ == '__main__':
     for graph_path in gml_paths:
         g = load_graph(graph_path)
         print(dump_graph_for_graphviz(g))
-        g = nx.read_gml(graph_path)
+
+        subgraphs = slice_graph(g)
+
+        # not working as expected with Russian encoding
+        # g = nx.read_gml(graph_path)
         print(g)
