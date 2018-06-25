@@ -1,38 +1,8 @@
-import argparse
-import os
 import networkx as nx
 import re
 import copy
 
-
-def dump_graph_for_graphviz(graph: nx.MultiDiGraph, node_attrs: list = ['kind', 'op', 'shape'],
-                            edge_attrs: list = ['in', 'out']):
-    nodes_to_dump = graph.nodes()
-    string = '\ndigraph {\n'
-    for src_node_name, dst_node_name, attrs in graph.edges(data=True):
-        if src_node_name not in nodes_to_dump or dst_node_name not in nodes_to_dump:
-            continue
-        src_node = graph.node[src_node_name]
-        dst_node = graph.node[dst_node_name]
-        src_node_string = str(src_node_name) + '\\n' + '\\n'.join(
-            [str(key) + '=' + str(src_node.get(key, 'None')) for key in node_attrs if key in src_node])
-        dst_node_string = str(dst_node_name) + '\\n' + '\\n'.join(
-            [str(key) + '=' + str(dst_node.get(key, 'None')) for key in node_attrs if key in dst_node])
-        edge_string = ' '.join([str(key) + '=' + str(attrs.get(key, 'None')) for key in edge_attrs if key in attrs])
-        string += '"{}" -> "{}" [label = "{}"];\n'.format(src_node_string, dst_node_string, edge_string)
-    string += '}'
-    return string
-
-
-def new_attrs():
-    return copy.deepcopy({
-        'postID': None,
-        'commentID': None,
-        'text': None,
-        'likes': None,
-        'intentLabels': None,
-        'contentLabels': None,
-    })
+from gml_utils import new_attrs
 
 
 def load_graph(graph_path):
@@ -57,7 +27,6 @@ def load_graph(graph_path):
                 new_node_attrs = copy.deepcopy(attrs)
                 new_id = new_node_attrs['commentID'] if new_node_attrs['commentID'] else new_node_attrs['postID']
                 g.add_node(new_id, **new_node_attrs)
-                print(dump_graph_for_graphviz(g))
                 attrs = new_attrs()
                 is_in_node = False
                 continue
@@ -90,60 +59,3 @@ def load_graph(graph_path):
                 to_node = re.findall(r'\d+', line.strip())[0]
 
     return g
-
-
-def slice_graph(graph, root=None, subgraph=()):
-    if not root:
-        root = next(nx.topological_sort(graph))
-    if not subgraph:
-        subgraph = (root,)
-    else:
-        subgraph = (*subgraph, root)
-
-    children = list(graph.successors(root))
-    if len(children) == 0:
-        # add the subgraph to the final list
-        return subgraph
-    all_subgraphs = []
-    for child in children:
-        # recursively go through the children
-        subgraphs_from_child = slice_graph(graph, root=child)
-        all_subgraphs.extend([(root, *sub_g) for sub_g in subgraphs_from_child])
-    return all_subgraphs
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--data-dir',
-                        help='Path to the directory containing .gml files' +
-                             '\n For example, /home/user/data',
-                        type=str,
-                        default='.')
-
-    argv = parser.parse_args()
-
-    gml_paths = []
-    # traverse root directory, and list directories as dirs and files as files
-    for root, dirs, files in os.walk(argv.data_dir):
-        path = root.split(os.sep)
-
-        print(root)
-        print((len(path) - 1) * '---', os.path.basename(root))
-
-        for file_name in files:
-            if not file_name.endswith('.gml'):
-                continue
-            print(len(path) * '---', file_name)
-
-            gml_paths.append(os.path.abspath(os.path.join(root, file_name)))
-
-    for graph_path in gml_paths:
-        g = load_graph(graph_path)
-        print(dump_graph_for_graphviz(g))
-
-        subgraphs = slice_graph(g)
-
-        # not working as expected with Russian encoding
-        # g = nx.read_gml(graph_path)
-        print(g)
