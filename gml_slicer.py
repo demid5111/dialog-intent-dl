@@ -19,3 +19,4 @@ def slice_graph(graph, root=None, subgraph=()):
         subgraphs_from_child = slice_graph(graph, root=child)
         all_subgraphs.extend([(root, *sub_g) for sub_g in subgraphs_from_child])
     return all_subgraphs
+

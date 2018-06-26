@@ -1,5 +1,8 @@
 import copy
 import networkx as nx
+import pandas as pd
+import numpy as np
+
 
 def dump_graph_for_graphviz(graph: nx.MultiDiGraph, node_attrs: list = ['kind', 'op', 'shape'],
                             edge_attrs: list = ['in', 'out']):
@@ -29,3 +32,39 @@ def new_attrs():
         'intentLabels': None,
         'contentLabels': None,
     })
+
+
+def traverse_sequence(graph, root=None, seq=()):
+    if not root:
+        root = next(nx.topological_sort(graph))
+    seq = (*seq, root)
+    children = list(graph.successors(root))
+    if len(children) > 1:
+        raise NotImplementedError('traverse_sequence function works only for sequences')
+    if len(children) == 0:
+        return seq
+    return traverse_sequence(graph, root=children[0], seq=seq)
+
+
+def create_graph_df(graph):
+    header = ['ID of comment', 'ID of post', 'Likes', 'Intent analysis', 'Content analysis', 'Text']
+    csv_name_to_prop = {
+        'ID of comment': 'commentID',
+        'ID of post': 'postID',
+        'Likes': 'likes',
+        'Intent analysis': 'intentLabels',
+        'Content analysis': 'contentLabels',
+        'Text': 'text'
+    }
+    lines = []
+    node_ids = traverse_sequence(graph)
+    for child in node_ids:
+        lines.append([graph.node[child][csv_name_to_prop[i]] for i in header])
+
+    return pd.DataFrame(data=np.array(lines), columns=header)
+
+
+def dump_graph_csv(graph, file_name='output/output'):
+    df = create_graph_df(graph)
+
+    df.to_csv('{}.csv'.format(file_name))

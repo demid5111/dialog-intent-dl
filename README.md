@@ -30,3 +30,10 @@ brew install homebrew/science/igraph
 ```
 pip3 install -r requirements.txt
 ```
+
+## Running
+
+Example command:
+```
+python3.5 main.py --data-dir data/ --output-dir output/
+```

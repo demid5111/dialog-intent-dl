@@ -2,5 +2,6 @@
 __pycache__
 
 data
+output
 
 !data/sample_0.gml

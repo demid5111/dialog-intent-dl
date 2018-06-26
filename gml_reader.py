@@ -39,12 +39,13 @@ def load_graph(graph_path):
 
             if is_in_node and re.match('^\s*id\s\d+\n$', line):
                 el_id = re.split('d+', line)[-1].strip()
+                attrs['commentID'] = el_id
                 if is_post_node:
                     attrs['postID'] = el_id
                     post_id = attrs['postID']
+                    is_post_node = False
                 else:
                     attrs['postID'] = post_id
-                    attrs['commentID'] = el_id
             elif is_in_node and re.match(r'^\s*intent\s".*"\n$', line):
                 attrs['intentLabels'] = re.split('"', line)[-1].strip()
             elif is_in_node and re.match(r'^\s*content\s".*"\n$', line):
