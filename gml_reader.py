@@ -47,13 +47,13 @@ def load_graph(graph_path):
                 else:
                     attrs['postID'] = post_id
             elif is_in_node and re.match(r'^\s*intent\s".*"\n$', line):
-                attrs['intentLabels'] = re.split('"', line)[-1].strip()
+                attrs['intentLabels'] = re.split('"', line.strip())[1]
             elif is_in_node and re.match(r'^\s*content\s".*"\n$', line):
-                attrs['contentLabels'] = re.split('"', line)[-1].strip()
+                attrs['contentLabels'] = re.split('"', line.strip())[1]
             elif is_in_node and re.match(r'^\s*likes\s\d+\n$', line):
                 attrs['likes'] = re.findall(r'\d+', line.strip())[0]
-            elif is_in_node and re.match(r'^\s*content\s".*"\n$', line):
-                attrs['text'] = re.split(r'"', line)[-1].strip()
+            elif is_in_node and re.match(r'^\s*text\s".*"\n$', line):
+                attrs['text'] = re.split('"', line.strip())[1]
             elif is_in_edge and re.match(r'^\s*source\s\d+\n$', line):
                 from_node = re.findall(r'\d+', line.strip())[0]
             elif is_in_edge and re.match(r'^\s*target\s\d+\n$', line):

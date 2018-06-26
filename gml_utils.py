@@ -46,7 +46,7 @@ def traverse_sequence(graph, root=None, seq=()):
     return traverse_sequence(graph, root=children[0], seq=seq)
 
 
-def create_graph_df(graph):
+def create_graph_df(graph, node_ids=None):
     header = ['ID of comment', 'ID of post', 'Likes', 'Intent analysis', 'Content analysis', 'Text']
     csv_name_to_prop = {
         'ID of comment': 'commentID',
@@ -57,14 +57,15 @@ def create_graph_df(graph):
         'Text': 'text'
     }
     lines = []
-    node_ids = traverse_sequence(graph)
+    if not node_ids:
+        node_ids = traverse_sequence(graph)
     for child in node_ids:
         lines.append([graph.node[child][csv_name_to_prop[i]] for i in header])
 
     return pd.DataFrame(data=np.array(lines), columns=header)
 
 
-def dump_graph_csv(graph, file_name='output/output'):
-    df = create_graph_df(graph)
+def dump_graph_csv(graph, file_name='output/output', node_ids=None):
+    df = create_graph_df(graph, node_ids)
 
     df.to_csv('{}.csv'.format(file_name))

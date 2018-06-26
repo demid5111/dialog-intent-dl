@@ -3,23 +3,23 @@ graph
   directed 1
   node
   [
-    id 0
+    id "0"
   ]
   node
   [
-    id 1
+    id "1"
   ]
   node
   [
-    id 2
+    id "2"
   ]
   node
   [
-    id 3
+    id "3"
   ]
   node
   [
-    id 4
+    id "4"
   ]
   edge
   [
