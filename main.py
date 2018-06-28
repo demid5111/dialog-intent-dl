@@ -6,34 +6,38 @@ import nltk
 from intent.gml.gml_distance_calculator import calculate_doc2vec_l2_norm
 from intent.utils.cli import get_cli_arguments
 from intent.gml.gml_reader import load_graph
-from intent.gml.gml_slicer import slice_graph
-from intent.gml.gml_utils import dump_graph_csv
+from intent.gml.gml_slicer import slice_graph_nx, clean_up_graph, connect_missed_subgraphs
+from intent.gml.gml_utils import dump_graph_csv, dump_graph_for_graphviz
 from intent.utils.io_utils import find_all_paths
 
 
-def split_gml(graph_path, argv):
+def split_gml(graph_path, output_dir, vec_size, ft_model):
     file_name = graph_path.split(os.sep)[-1].split('.')[0]
 
     g = load_graph(graph_path)
-    calculate_doc2vec_l2_norm(g)
 
-    subgraphs = slice_graph(g)
+    clean_up_graph(g)
+    connect_missed_subgraphs(g)
+
+    calculate_doc2vec_l2_norm(g, vec_size, ft_model)
+
+    subgraphs = slice_graph_nx(g)
 
     sub = [g.subgraph(s) for s in subgraphs]
-    file_name_template = os.path.join(argv.output_dir, '{}_output_{{}}'.format(file_name))
+    file_name_template = os.path.join(output_dir, '{}_output_{{}}'.format(file_name))
 
-    return sub, file_name_template
+    return g, sub, file_name_template
 
 
-def split_gml_plain(graph_path, argv, i):
-    sub, file_name_template = split_gml(graph_path, argv)
+def split_gml_plain(graph_path, output_dir, ft_model, vec_size, i):
+    _, sub, file_name_template = split_gml(graph_path, output_dir, vec_size, ft_model)
     for idx, s in enumerate(sub):
         dump_graph_csv(s, file_name=file_name_template.format(idx))
     print('Finished with {}'.format(i))
 
 
-def split_gml_light_concurrent(graph_path, argv, i):
-    subgraph_ids, file_name_template = split_gml(graph_path, argv)
+def split_gml_light_concurrent(graph_path, output_dir, ft_model, vec_size, i):
+    g, subgraph_ids, file_name_template = split_gml(graph_path, output_dir, vec_size, ft_model)
     import time
     from gevent.pool import Pool
 
@@ -66,13 +70,13 @@ if __name__ == '__main__':
     if argv.proxy:
         nltk.set_proxy(argv.proxy)
 
-    nltk.download('stopwords')
-
+    # nltk.download('stopwords')
+    #
     ft_model = gensim.models.fasttext.FastText.load(argv.model)
 
     for idx, graph_path in enumerate(gml_paths):
         print('Analyzing {}/{}, file: {}'.format(idx + 1, len(gml_paths), graph_path))
         if argv.mode == 'plain':
-            split_gml_plain(graph_path, argv, idx)
+            split_gml_plain(graph_path, argv.output_dir, ft_model, vec_size=300, i=idx)
         else:
-            split_gml_light_concurrent(graph_path, argv, idx)
+            split_gml_light_concurrent(graph_path, argv.output_dir, ft_model, vec_size=300, i=idx)

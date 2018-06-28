@@ -6,7 +6,3 @@ __pycache__
 data
 models
 output
-
-# Exclude particular sample graphs
-!data/sample_0.gml
-!data/sample_1.gml

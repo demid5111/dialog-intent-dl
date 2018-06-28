@@ -39,10 +39,12 @@ def create_average_vec(doc, vec_dim, ft_model):
     return average
 
 
-def doc2vec(document, vec_size=200, ft_model=None):
+def doc2vec(document, vec_size=300, ft_model=None):
     """
     Translates the given string to the embedding vector corresponding to it
     :param document: string with the text
+    :param vec_size: size of the embedding vector
+    :param ft_model: model containing all word embeddings
     :return: embedding vector
     """
     processed_text = clean_text(document)
