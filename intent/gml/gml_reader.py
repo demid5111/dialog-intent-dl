@@ -2,7 +2,7 @@ import networkx as nx
 import re
 import copy
 
-from gml_utils import new_attrs
+from intent.gml.gml_utils import new_attrs
 
 
 def load_graph(graph_path):

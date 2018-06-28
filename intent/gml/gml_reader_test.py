@@ -1,6 +1,6 @@
 import unittest
 
-from gml_reader import load_graph, slice_graph
+from intent.gml.gml_reader import load_graph, slice_graph
 
 
 class GMLStripperTest(unittest.TestCase):
