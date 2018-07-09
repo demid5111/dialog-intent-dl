@@ -38,4 +38,10 @@ def get_cli_arguments():
                              'creating the file per each sequence',
                         choices=['plain', 'concurrent'],
                         default='plain')
+
+    parser.add_argument('--single-intent',
+                        help='The graph can contain comments with numerous intentions. ' +
+                        'Using this option reduces number of paths due to ignorance ' +
+                        'of all intentions except the main one',
+                        action='store_true')
     return parser

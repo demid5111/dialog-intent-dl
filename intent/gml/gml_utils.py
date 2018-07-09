@@ -31,6 +31,7 @@ def new_attrs():
         'likes': None,
         'intentLabels': None,
         'contentLabels': None,
+        'isRoot': False,
     })
 
 

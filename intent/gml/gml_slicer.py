@@ -1,11 +1,22 @@
 import networkx as nx
+import re
 
 from intent.gml.gml_utils import dump_graph_for_graphviz
 
 
+def find_root(graph):
+    root = None
+    for node in graph:
+        if graph.nodes[node]['isRoot']:
+            root = node
+            break
+    return root
+
+
 def slice_graph_recursive(graph, root=None, subgraph=()):
     if not root:
-        root = next(nx.topological_sort(graph))
+        root = find_root(graph)
+
     if not subgraph:
         subgraph = (root,)
     else:
@@ -27,7 +38,7 @@ def slice_graph_recursive(graph, root=None, subgraph=()):
 
 
 def slice_graph_nx(graph):
-    root = next(nx.topological_sort(graph))
+    root = find_root(graph)
 
     paths = []
     for node in graph:
@@ -49,16 +60,47 @@ def clean_up_graph(graph):
 
 
 def connect_missed_subgraphs(graph):
-    # find the root (the node with maximum output nodes and 0 inputs)
-    max_degree = -1
-    root = None
+    root = find_root(graph)
     pseudo_roots = []
     for node in graph:
         if graph.in_degree(node) == 0 and graph.out_degree(node) > 0:
             pseudo_roots.append(node)
 
-        if graph.in_degree(node) == 0 and graph.out_degree(node) > max_degree:
-            max_degree = graph.out_degree(node)
-            root = node
-
     graph.add_edges_from(((root, i) for i in pseudo_roots if i != root))
+
+
+def _filter_extra_intent_path(graph, path):
+    candidates = [graph.nodes[el_id] for el_id in path if re.match('^\d+0(\d{2}|0\d)$', el_id)]
+    return bool([i for i in candidates if i['commentID'][:-3] in graph.nodes])
+
+
+def remove_extra_intentions(graph):
+    """
+    The graph contains such paths:
+        node1113 (main intent)
+        /
+    root
+        \
+        node1113001 (auxiliary intent)
+
+    Removing all such nodes with suffix 00(1,2,3,...) with all the paths after them
+    :param graph: the original graph
+    :param paths: list of paths
+    """
+    root = find_root(graph)
+
+    to_remove = []
+    for node in graph:
+        el_id = graph.nodes[node]['commentID']
+        if re.match('^\d+0(\d{2}|0\d)$', el_id) and el_id[:-3] in graph.nodes:
+            to_remove.append(node)
+    graph.remove_nodes_from(to_remove)
+
+    i = 0
+    for comp in nx.connected_components(graph.to_undirected()):
+        if root not in comp:
+            i += 1
+            graph.remove_nodes_from(comp)
+
+    if i > 0:
+        print('[INFO] Removed {} connected components that does not contain main root'.format(i))

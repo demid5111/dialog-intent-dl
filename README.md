@@ -66,3 +66,12 @@ If you run behind corporate proxy, use `--proxy`:
 python3.5 main.py --model models/araneum_none_fasttextcbow_300_5_2018.model\
                   --proxy http://user:password@corp-proxy.com:911
 ```
+
+If you run to analyze only one intention per comment in parallel:
+```
+python3.5 main.py --data-dir data/ \
+                  --output-dir output/ \
+                  --model models/araneum_none_fasttextcbow_300_5_2018.model
+                  --single-intent \
+                  --mode concurrent
+```

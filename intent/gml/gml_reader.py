@@ -42,6 +42,7 @@ def load_graph(graph_path):
                 attrs['commentID'] = el_id
                 if is_post_node:
                     attrs['postID'] = el_id
+                    attrs['isRoot'] = True
                     post_id = attrs['postID']
                     is_post_node = False
                 else:
