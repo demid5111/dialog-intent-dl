@@ -47,17 +47,25 @@ def traverse_sequence(graph, root=None, seq=()):
     return traverse_sequence(graph, root=children[0], seq=seq)
 
 
-def create_graph_df(graph, node_ids=None):
-    header = [
+def create_graph_df(graph, node_ids=None, only_distance=False):
+    mandatory_header = [
         'ID of comment',
         'ID of post',
         'Likes',
         'Intent analysis',
         'Content analysis',
-        'Doc2Vec value',
         'Distance to parent',
         'Distance to post'
     ]
+    optional_header = [
+        'Doc2Vec value',
+    ]
+
+    header = []
+    header.extend(mandatory_header)
+    if not only_distance:
+        header.extend(optional_header)
+
     csv_name_to_prop = {
         'ID of comment': 'commentID',
         'ID of post': 'postID',
@@ -68,6 +76,7 @@ def create_graph_df(graph, node_ids=None):
         'Distance to parent': 'distanceParent',
         'Distance to post': 'distanceRoot',
     }
+
     lines = []
     if not node_ids:
         node_ids = traverse_sequence(graph)
@@ -83,7 +92,10 @@ def create_graph_df(graph, node_ids=None):
     return pd.DataFrame(data=np.array(lines), columns=header)
 
 
-def dump_graph_csv(graph, file_name='output/output', node_ids=None):
-    df = create_graph_df(graph, node_ids)
+def dump_graph_csv(graph, file_name='output/output', node_ids=None, only_distance=False, output_format='csv'):
+    df = create_graph_df(graph, node_ids, only_distance=only_distance)
 
-    df.to_csv('{}.csv'.format(file_name))
+    if output_format == 'hdf5':
+        df.to_hdf('{}.h5'.format(file_name), key='data')
+    else:
+        df.to_csv('{}.csv'.format(file_name))

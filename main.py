@@ -50,18 +50,26 @@ def split_gml(graph_path, output_dir, vec_size, single_intent, ft_model, posts_i
     return g, sub, file_name_template
 
 
-def split_gml_plain(graph_path, output_dir, single_intent, ft_model, vec_size, i, posts_index=None, distance='cosine'):
+def split_gml_plain(graph_path, output_dir, single_intent, ft_model, vec_size, i, posts_index=None, distance='cosine',
+                    only_distance=False, output_format='csv'):
     _, sub, file_name_template = split_gml(graph_path, output_dir, vec_size, single_intent, ft_model,
                                            posts_index=posts_index, distance=distance)
     for idx, s in enumerate(sub):
-        dump_graph_csv(s, file_name=file_name_template.format(idx))
+        dump_graph_csv(s, file_name=file_name_template.format(idx), only_distance=only_distance,
+                       output_format=output_format)
     print('Finished with {}'.format(i))
 
 
 def split_gml_light_concurrent(graph_path, output_dir, single_intent, ft_model, vec_size, i, posts_index=None,
-                               distance='cosine'):
+                               distance='cosine', only_distance=False, output_format='csv'):
     g, subgraph_ids, file_name_template = split_gml(graph_path, output_dir, vec_size, single_intent, ft_model,
                                                     posts_index=posts_index, distance=distance)
+
+    if only_distance:
+        print('[WARNING] --only-distance flag is not available for the concurrent mode')
+    if output_format != 'csv':
+        print('[WARNING] --output-format flag does not override default output format: "csv"')
+
     import time
     from gevent.pool import Pool
 
@@ -112,7 +120,9 @@ if __name__ == '__main__':
         print('Analyzing graphs: {}/{}, file: {}'.format(idx + 1, len(gml_paths), graph_path))
         if argv.mode == 'plain':
             split_gml_plain(graph_path, argv.output_dir, argv.single_intent, ft_model, vec_size=300, i=idx,
-                            posts_index=posts_index, distance=argv.metric)
+                            posts_index=posts_index, distance=argv.metric, only_distance=argv.only_distance,
+                            output_format=argv.output_format)
         else:
             split_gml_light_concurrent(graph_path, argv.output_dir, argv.single_intent, ft_model, vec_size=300, i=idx,
-                                       posts_index=posts_index, distance=argv.metric)
+                                       posts_index=posts_index, distance=argv.metric, only_distance=argv.only_distance,
+                                       output_format=argv.output_format)

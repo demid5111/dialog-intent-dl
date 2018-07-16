@@ -57,6 +57,7 @@ rm araneum_none_fasttextcbow_300_5_2018.tgz
 Example command:
 ```
 python3.5 main.py --data-dir data/ \
+                  --posts-dir data/posts/ \
                   --output-dir output/ \
                   --model models/araneum_none_fasttextcbow_300_5_2018.model
 ```
@@ -70,8 +71,24 @@ python3.5 main.py --model models/araneum_none_fasttextcbow_300_5_2018.model\
 If you run to analyze only one intention per comment in parallel:
 ```
 python3.5 main.py --data-dir data/ \
+                  --posts-dir data/posts/ \
                   --output-dir output/ \
                   --model models/araneum_none_fasttextcbow_300_5_2018.model
                   --single-intent \
                   --mode concurrent
+```
+
+If you run to analyze only one intention per comment in sequential mode with only distance captured,
+with cosine metric and save to hdf5 format:
+
+```
+python3.5 main.py --data-dir data/ \
+                  --posts-dir data/posts/ \
+                  --output-dir output/ \
+                  --model models/araneum_none_fasttextcbow_300_5_2018.model
+                  --single-intent \
+                  --mode plain \
+                  --metric cosine \
+                  --only-distances \
+                  --output-format hdf5
 ```

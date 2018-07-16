@@ -57,4 +57,13 @@ def get_cli_arguments():
                              'Using this option reduces number of paths due to ignorance ' +
                              'of all intentions except the main one',
                         action='store_true')
+
+    parser.add_argument('--only-distance',
+                        help='Include in the output file only distances without vectors for comments',
+                        action='store_true')
+
+    parser.add_argument('--output-format',
+                        help='Format of the output file: csv or hdf5. For hdf5 format, the key is "data"',
+                        choices=['csv', 'hdf5'],
+                        default='csv')
     return parser
