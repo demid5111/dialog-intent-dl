@@ -1,7 +1,7 @@
 import networkx as nx
 import re
 
-from intent.gml.gml_utils import dump_graph_for_graphviz
+from intent.post.post_reader import get_posts_col, get_text_col
 
 
 def find_root(graph):
@@ -104,3 +104,12 @@ def remove_extra_intentions(graph):
 
     if i > 0:
         print('[INFO] Removed {} connected components that does not contain main root'.format(i))
+
+
+def embed_post_text(graph, df):
+    root = find_root(graph)
+    postID = graph.nodes[root]['postID']
+    df_tmp = df.loc[get_posts_col(df) == int(postID)]
+    if df_tmp.shape[0] == 0:
+        raise ValueError('Unable to find post id {}'.format(postID))
+    graph.nodes[root]['text'] = get_text_col(df_tmp.iloc[0])

@@ -10,6 +10,19 @@ def get_cli_arguments():
                         type=str,
                         default='.',
                         required=True)
+    parser.add_argument('--posts-dir',
+                        help='Path to the directory containing .csv files with information about' +
+                             ' posts.' +
+                             '\n For example, /home/user/posts',
+                        type=str,
+                        default='.',
+                        required=True)
+
+    parser.add_argument('--metric',
+                        help='Distance metric for comments and posts.' +
+                             '\n For example, "cosine"',
+                        choices=['cosine',],
+                        default='cosine')
 
     parser.add_argument('--model',
                         help='The path to the model. Before running the tool, ' +
@@ -41,7 +54,7 @@ def get_cli_arguments():
 
     parser.add_argument('--single-intent',
                         help='The graph can contain comments with numerous intentions. ' +
-                        'Using this option reduces number of paths due to ignorance ' +
-                        'of all intentions except the main one',
+                             'Using this option reduces number of paths due to ignorance ' +
+                             'of all intentions except the main one',
                         action='store_true')
     return parser

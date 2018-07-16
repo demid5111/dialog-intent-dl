@@ -48,14 +48,25 @@ def traverse_sequence(graph, root=None, seq=()):
 
 
 def create_graph_df(graph, node_ids=None):
-    header = ['ID of comment', 'ID of post', 'Likes', 'Intent analysis', 'Content analysis', 'Doc2Vec value']
+    header = [
+        'ID of comment',
+        'ID of post',
+        'Likes',
+        'Intent analysis',
+        'Content analysis',
+        'Doc2Vec value',
+        'Distance to parent',
+        'Distance to post'
+    ]
     csv_name_to_prop = {
         'ID of comment': 'commentID',
         'ID of post': 'postID',
         'Likes': 'likes',
         'Intent analysis': 'intentLabels',
         'Content analysis': 'contentLabels',
-        'Doc2Vec value': 'text'
+        'Doc2Vec value': 'text',
+        'Distance to parent': 'distanceParent',
+        'Distance to post': 'distanceRoot',
     }
     lines = []
     if not node_ids:
