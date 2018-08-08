@@ -99,3 +99,40 @@ def dump_graph_csv(graph, file_name='output/output', node_ids=None, only_distanc
         df.to_hdf('{}.h5'.format(file_name), key='data')
     else:
         df.to_csv('{}.csv'.format(file_name))
+
+    return df
+
+
+def transform_chains_from_root(dfs):
+    return [transform_chain_to_row(df, key='Distance to post') for df in dfs]
+
+
+def transform_chains_from_neighbor(dfs):
+    return [transform_chain_to_row(df, key='Distance to parent') for df in dfs]
+
+
+def transform_chain_to_row(df, key):
+    only_vals = df[[key]]
+    return [row[key] for idx, row in only_vals.iterrows()]
+
+
+def transform_chains_to_rows(dfs):
+    return transform_chains_from_root(dfs), transform_chains_from_neighbor(dfs)
+
+
+def vectors_to_df(vecs):
+    df = pd.DataFrame(data=vecs)
+    return df
+
+
+def create_df_from(vecs):
+    return vectors_to_df(vecs)
+
+
+def dump_vectors_to_excel(df1, df2, file_name='output/distances.xlsx', df1_name='From Root', df2_name='From Parent'):
+    writer = pd.ExcelWriter(file_name, engine='xlsxwriter')
+
+    df1.to_excel(writer, sheet_name=df1_name, index=False, header=False)
+    df2.to_excel(writer, sheet_name=df2_name, index=False, header=False)
+
+    writer.save()

@@ -45,13 +45,6 @@ def get_cli_arguments():
                         type=str,
                         default='')
 
-    parser.add_argument('--mode',
-                        help='The mode to run the tool. Either "plain"(default) or ' +
-                             '"concurrent" to parallel routine of traversing the graph and ' +
-                             'creating the file per each sequence',
-                        choices=['plain', 'concurrent'],
-                        default='plain')
-
     parser.add_argument('--single-intent',
                         help='The graph can contain comments with numerous intentions. ' +
                              'Using this option reduces number of paths due to ignorance ' +
