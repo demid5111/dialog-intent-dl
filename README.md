@@ -23,17 +23,72 @@ source activate env3
 ```
 
 3. Install dependencies:
-3.1 For macOS install:
-```
-brew install homebrew/science/igraph
-```
+
 ```
 pip3 install -r requirements.txt
 ```
+
+4. Download the model to translate text with doc2vec from the
+[official website](http://rusvectores.org/ru/models/):
+4.1. Optional. If you are behind the proxy, run:
+```
+export http_proxy=http://user:password@corp-proxy.com:911
+```
+4.2. Download the model file:
+```
+curl -O http://rusvectores.org/static/models/rusvectores4/fasttext/araneum_none_fasttextcbow_300_5_2018.tgz
+```
+
+4.3. Unpack the archive:
+```
+mkdir models/araneum
+tar -xvzf araneum_none_fasttextcbow_300_5_2018.tgz -C models/araneum/
+```
+
+4.4. Remove obsolete archive:
+```
+rm araneum_none_fasttextcbow_300_5_2018.tgz
+```
+
+
 
 ## Running
 
 Example command:
 ```
-python3.5 main.py --data-dir data/ --output-dir output/
+python3.5 main.py --data-dir data/ \
+                  --posts-dir data/posts/ \
+                  --output-dir output/ \
+                  --model models/araneum_none_fasttextcbow_300_5_2018.model
+```
+
+If you run behind corporate proxy, use `--proxy`:
+```
+python3.5 main.py --model models/araneum_none_fasttextcbow_300_5_2018.model\
+                  --proxy http://user:password@corp-proxy.com:911
+```
+
+If you run to analyze only one intention per comment in parallel:
+```
+python3.5 main.py --data-dir data/ \
+                  --posts-dir data/posts/ \
+                  --output-dir output/ \
+                  --model models/araneum_none_fasttextcbow_300_5_2018.model
+                  --single-intent \
+                  --mode concurrent
+```
+
+If you run to analyze only one intention per comment in sequential mode with only distance captured,
+with cosine metric and save to hdf5 format:
+
+```
+python3.5 main.py --data-dir data/ \
+                  --posts-dir data/posts/ \
+                  --output-dir output/ \
+                  --model models/araneum_none_fasttextcbow_300_5_2018.model
+                  --single-intent \
+                  --mode plain \
+                  --metric cosine \
+                  --only-distances \
+                  --output-format hdf5
 ```

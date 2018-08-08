@@ -2,7 +2,7 @@ import networkx as nx
 import re
 import copy
 
-from gml_utils import new_attrs
+from intent.gml.gml_utils import new_attrs
 
 
 def load_graph(graph_path):
@@ -42,6 +42,7 @@ def load_graph(graph_path):
                 attrs['commentID'] = el_id
                 if is_post_node:
                     attrs['postID'] = el_id
+                    attrs['isRoot'] = True
                     post_id = attrs['postID']
                     is_post_node = False
                 else:
