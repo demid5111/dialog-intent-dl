@@ -107,15 +107,16 @@ if __name__ == '__main__':
                                                            distance=argv.metric,
                                                            only_distance=argv.only_distance,
                                                            output_format=argv.output_format)
-        if len(from_root) <= LIMIT and len(from_neighbor) <= LIMIT:
+        if argv.only_distance and len(from_root) < LIMIT and len(from_neighbor) < LIMIT:
             to_add_num = abs(LIMIT - len(from_root))
             print('Adding new package of size: {}'.format(len(new_from_root)))
             from_root.extend(new_from_root[:to_add_num])
             from_neighbor.extend(new_from_neighbor[:to_add_num])
-        else:
+        elif argv.only_distance:
             break
 
-    print('Ready to save first {} distances'.format(LIMIT))
-    from_root_df = create_df_from(from_root)
-    from_neighbor_df = create_df_from(from_neighbor)
-    dump_vectors_to_excel(from_root_df, from_neighbor_df)
+    if argv.only_distance:
+        print('Ready to save first {} distances'.format(LIMIT))
+        from_root_df = create_df_from(from_root)
+        from_neighbor_df = create_df_from(from_neighbor)
+        dump_vectors_to_excel(from_root_df, from_neighbor_df)
