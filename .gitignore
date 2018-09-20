@@ -5,4 +5,5 @@ __pycache__
 # Artifacts
 data
 models
-output
+/feature_and_vector_seq
+/ipynb/.ipynb_checkpoints
