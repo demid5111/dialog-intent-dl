@@ -138,56 +138,6 @@ history_MLP = pi.fit_generator(epochs = 100)
 save_model(K.get_session(), history_MLP, 'history_MLP.pb')
 
 
-# In[88]:
-
-
-len_y = 30
-x = range(1,len_y+1)
-y1 = history_BiRNN.history['val_acc'][:len_y]
-y2 = history_RNN.history['val_acc'][:len_y]
-y3 = history_CNN.history['val_acc'][:len_y]
-y4 = history_MLP.history['val_acc'][:len_y]
-
-plt.xlabel("Epochs")
-plt.ylabel("Validation Accuracy")
-
-plt.plot(x,y1, 'k-.', label='BiRNN', linewidth=2)
-plt.plot(x,y2, 'k--', label='RNN', linewidth=1)
-plt.plot(x,y3, 'k-', label='CNN', linewidth=1)
-plt.plot(x,y4, 'k:', label='MLP', linewidth=2)
-plt.legend(loc='upper right')
-
-
-# In[ ]:
-
-
-# 25 int
-
-# RNN, 100 ep return_sequences=True 
-# 13100 30 - loss: 2.9677 - acc: 0.1152
-# 1310  30 - loss: 2.6313 - acc: 0.2464
-# 131   30 - loss: 1.8456 - acc: 0.4678
-# 13    30 - loss: 2.1301 - acc: 0.4263
-# 1     30 - loss: 2.5108 - acc: 0.2834
-
-# BiRNN, 100 ep return_sequences=True
-# 1310    2s/step - loss: 2.1712 - acc: 0.3397 - val_loss: 2.0868 - val_acc: 0.3754 
-# 131  199ms/step - loss: 0.7650 - acc: 0.7808 - val_loss: 0.6818 - val_acc: 0.8034
-# 13    27ms/step - loss: 0.6413 - acc: 0.8194 - val_loss: 0.5457 - val_acc: 0.8517 1-LSTM
-# 13    30ms/step - loss: 0.6472 - acc: 0.8171 - val_loss: 0.5493 - val_acc: 0.8717 2-LSTM 
-# 13    36ms/step - loss: 0.5443 - acc: 0.8493 - val_loss: 0.4665 - val_acc: 0.8766 3-LSTM 
-# 1     20ms/step - loss: 0.7527 - acc: 0.7846 - val_loss: 0.6238 - val_acc: 0.8288
-
-# MLP
-# 131  199ms/step - loss: 4.6698 - acc: 0.3628 - val_loss: 2.0174 - val_acc: 0.4895
-# 13  
-
-# CNN
-# 13  27ms/step - loss: 1.9294 - acc: 0.4842 - val_loss: 1.9757 - val_acc: 0.5213
-
-
-# In[206]:
-
 
 pgi = PredictIntent(is_general = True)
 pgi.batch_size = 13
