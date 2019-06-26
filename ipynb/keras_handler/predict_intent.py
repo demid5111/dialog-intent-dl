@@ -26,11 +26,11 @@ class PredictIntent():
     num_units = 30
     validation_split = 0.2
     random_state = 42
-    data_path = "../feature_and_vector_seq"
     tb = TensorBoard(log_dir='./logs', histogram_freq=0, batch_size=32, write_graph=True, write_grads=False,
                      write_images=False, embeddings_freq=0, embeddings_layer_names=None, embeddings_metadata=None)
 
-    def __init__(self, is_general=False):
+    def __init__(self, is_general=False, data_path = "../feature_and_vector_seq"):
+        self.data_path = data_path
         if is_general:
             self.intent_index = self.general_intents
         else:
