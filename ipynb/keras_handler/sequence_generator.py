@@ -1,8 +1,15 @@
-import os, random
+import os, random, json, re
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
+
+def load_Doc2Vec_value(str1):
+  pattern1 = re.compile('\n')
+  pattern2 = re.compile(' ')
+  str2 = pattern1.sub('', str1)
+  str3 = pattern2.sub(', ', str2)
+  return json.loads(str3)
 
 class SequenceGenerator():
     def __init__(self, data_path, intent_index, max_sequence_length, validation_split, only_last=False,
@@ -15,14 +22,20 @@ class SequenceGenerator():
         self.file_list_train, self.file_list_test = self._split(validation_split, random_state=random_state)
 
     def _file2sequence(self, file_and_path):
-        sequence = []
-        for intent in pd.read_hdf(file_and_path, engine="python", encoding='cp1251')['Intent analysis']:
+        intent_list = []
+        embed_list = []
+        df1 = pd.read_hdf(file_and_path, engine="python", encoding='cp1251')
+
+        for key, row in df1.iterrows():
+            intent = row['Intent analysis']
+            doc2vec = load_Doc2Vec_value(row["Doc2Vec value"])
             if intent:
                 intent_char = intent[0].lower()
             else:
                 intent_char = ""
-            sequence.append(self.intent_index[intent_char])
-        return sequence
+            intent_list.append(self.intent_index[intent_char])
+            embed_list.append(doc2vec)
+        return intent_list, embed_list
 
     def _split(self, validation_split, random_state=None):
         file_list = os.listdir(self.data_path)
@@ -55,14 +68,14 @@ class SequenceGenerator():
                     f_i = 0
                     random.shuffle(file_list)
                 file_and_path = os.path.join(self.data_path, file_list[f_i])
-                sequence = self._file2sequence(file_and_path)
-                if len(sequence) > self.max_sequence_length:
-                    for ii in range(len(sequence) - self.max_sequence_length + 1):
-                        sequence_i = sequence[ii:self.max_sequence_length + ii]
+                intent_sequence, embed_sequence = self._file2sequence(file_and_path)
+                if len(intent_sequence) > self.max_sequence_length:
+                    for ii in range(len(intent_sequence) - self.max_sequence_length + 1):
+                        sequence_i = intent_sequence[ii:self.max_sequence_length + ii]
                         sequence_batch.append(sequence_i)
                         i += 1
                 else:
-                    sequence_i = sequence
+                    sequence_i = intent_sequence
                     sequence_batch.append(sequence_i)
                     i += 1
                 f_i += 1
