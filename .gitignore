@@ -7,3 +7,4 @@ data
 models
 /feature_and_vector_seq
 /ipynb/.ipynb_checkpoints
+/ipynb/logs
